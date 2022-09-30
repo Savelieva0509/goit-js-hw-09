@@ -81,7 +81,7 @@ const timer = {
         if (delta <= 0) {
             return;
         }
-        Notify.success('Відлік почався');
+
         this.getRefs(rootSelector);
             this.intervalId = setInterval(() => {
             const ms = deadLine.getTime() - Date.now(); 
