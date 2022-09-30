@@ -47,6 +47,8 @@ const inputEl = document.querySelector('#datetime-picker');
 const btnStart = document.querySelector('button[data-start]');
 
 let userDate = null;
+let deadLine = null;
+btnStart.disabled = true;
 
 const options = {
     enableTime: true,
@@ -54,6 +56,7 @@ const options = {
     defaultDate: new Date(),
     minuteIncrement: 1,
     onClose(selectedDates) {
+        deadLine = selectedDates[0].getTime()
         console.log(selectedDates[0]);
         if (selectedDates[0] < Date.now()) {
             btnStart.disabled = true;
@@ -63,9 +66,9 @@ const options = {
                 clickToClose: true,
                 closeButton: true,
             });
+            userDate = new Date();
            
         } else { 
-            Notify.success('Дедлайн настав');
             btnStart.disabled = false;
             userDate = selectedDates[0];
         }
@@ -76,18 +79,19 @@ const timer = {
     intervalId: null,
     refs: {},
     start(rootSelector, deadLine) {
-        const delta = deadLine.getTime()- Date.now();
+        const delta = deadLine - Date.now();
         
         if (delta <= 0) {
             return;
         }
-
-        this.getRefs(rootSelector);
+            Notify.success('Відлік почався');
+            this.getRefs(rootSelector);
             this.intervalId = setInterval(() => {
-            const ms = deadLine.getTime() - Date.now(); 
+            const ms = deadLine - Date.now(); 
 
             if (ms <= 1000) {
                 clearInterval(this.intervalId);
+                Notify.success('Дедлайн настав!', this.notifyOptions);
             }
         
             const data = this.convertMs(ms);
@@ -137,4 +141,4 @@ const timer = {
 };
 
     flatpickr(inputEl, options);
-    btnStart.addEventListener('click', () => timer.start());
+    btnStart.addEventListener('click', () => timer.start(timerRef, deadLine));
