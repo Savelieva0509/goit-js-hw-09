@@ -39,10 +39,38 @@
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-const TIMER_DEADLINE = new Date (2022,8,30,19,04)
+
 const timerRef = document.querySelector('.timer');
+
+const inputEl = document.querySelector('#datetime-picker');
+const btnStart = document.querySelector('button[data-start]');
+
+let userDate = null;
+
+const options = {
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
+    onClose(selectedDates) {
+        console.log(selectedDates[0]);
+        if (selectedDates[0] < Date.now()) {
+            btnStart.disabled = true;
+            Notify.failure('Вибраний час у минулому', {
+                position: 'center-center',
+                backOverLay: true,
+                clickToClose: true,
+                closeButton: true,
+            });
+           
+        } else { 
+            Notify.success('Дедлайн настав');
+            btnStart.disabled = false;
+            userDate = selectedDates[0];
+        }
+    },
+};
 
 const timer = {
     intervalId: null,
@@ -51,12 +79,6 @@ const timer = {
         const delta = deadLine.getTime()- Date.now();
         
         if (delta <= 0) {
-            Notify.failure('Вибраний час у минулому', {
-                position: 'center-center',
-                backOverLay: true,
-                clickToClose: true,
-                closeButton: true,
-            });
             return;
         }
         Notify.success('Відлік почався');
@@ -66,13 +88,13 @@ const timer = {
 
             if (ms <= 1000) {
                 clearInterval(this.intervalId);
-                Notify.success('Дедлайн настав');
             }
         
             const data = this.convertMs(ms);
-            Object.entries(data).forEach(([name, value]) => {
-                this.refs[name].textContent = this.pad(value);
-            })
+                Object.entries(data).forEach(([name, value]) => {
+                    this.refs[name].textContent = this.pad(value);
+                });
+
         // this.refs.days.textContent = this.pad(data.days);
         // this.refs.hours.textContent = this.pad(data.hours);
         // this.refs.minutes.textContent = this.pad(data.minutes);
@@ -86,10 +108,7 @@ const timer = {
         arr.forEach(item => {
             const { title } = item.dataset;
             this.refs[title] = item;
-    
-           
-            
-
+   
         })
         // this.refs.days = rootSelector.querySelector('[data-days]');
         // this.refs.hours = rootSelector.querySelector('[data-hours]');
@@ -103,13 +122,10 @@ const timer = {
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
+
   const days = Math.floor(ms / day);
-  // Remaining hours
   const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
   const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
@@ -120,4 +136,5 @@ const timer = {
 }
 };
 
-timer.start(timerRef,TIMER_DEADLINE)
+    flatpickr(inputEl, options);
+    btnStart.addEventListener('click', () => timer.start());
