@@ -2,19 +2,6 @@ import { Notify } from "notiflix";
 
 const formEl = document.querySelector('.form');
 formEl.addEventListener('submit', onFormSubmit);
-const input = document.querySelector('input');
-
-function onInputValue(event) {
-  let inputValue = event.currentTarget.value;
-  console.log(inputValue);
- 
-  if (inputValue < 0) {
-    inputValue = 0
-    console.log('error');
-  }
-}
-
-input.addEventListener('input',onInputValue )
 
 function onFormSubmit(event) {
   event.preventDefault();
@@ -23,7 +10,12 @@ function onFormSubmit(event) {
   let step = Number(event.currentTarget.step.value);
   let amount = Number(event.currentTarget.amount.value);
 
-  for (let position = 1; position <= amount; position += 1) {
+  if (delay < 0 || step < 0 || amount < 0) {
+    Notify.failure(`❌ number cannot be negative`)
+  }
+
+  else {
+    for (let position = 1; position <= amount; position += 1) {
 
  const onSuccess = ({ position, delay }) => {
    setTimeout(() => {
@@ -43,6 +35,7 @@ createPromise(position, delay)
   .catch(onError)
     
   delay += step;  
+    }
   }
 }
 
